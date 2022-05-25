@@ -1,8 +1,10 @@
+import Swal from 'sweetalert2';
+
 const nerdamer = require("nerdamer/all.min");
 
 export const calcularFxn = ( equation = '', xn = 0 ) => {
 
-    const fxn = nerdamer( equation, {x: xn} );
+    const fxn = nerdamer( equation, {x: xn} ).evaluate();
 
     return Number( Number ( fxn.text() ).toFixed(7)) ;
 }
@@ -39,10 +41,72 @@ export const secante = (xnValue, equation) => {
             }
         }
         
-        
+        if(n > 1000){
+            return  Swal.fire(
+                'Confirmado!',
+                'Tu resultado esta siendo procesado.',
+                'success'
+            );
+        }
         xnMenosUno = xn;
         xn = gx;
         gxAux = xn;
         n++;
     }
+}
+
+export const newton = (xnValue, equation, diffEquation) => {
+     
+    let xn = xnValue;
+    let gxAux = 0;
+    let n = 1;
+    let flag = true;
+    let error = 0;
+    while(flag){
+
+        let fxn = calcularFxn(equation, xn);
+        let fxnDiff = calcularFxn(diffEquation, xn);
+        let gx = calcularGxnNewton(xn, fxn, fxnDiff);
+
+        
+
+        if( n > 1){
+            error = Math.abs(gxAux - gx).toFixed(6);
+
+            if(error <= 0.0001){
+               
+
+                flag = false;
+                return gx;
+            }
+        }
+
+        xn = gx;
+        
+        gxAux = xn;
+        
+        if(n > 1000){
+            Swal.fire(
+                'Cambiar Xn!',
+                'No se encuentra la raiz',
+                'warning'
+            )
+            return 0;
+            
+        }
+        n++;
+    }
+        
+    
+    
+}
+
+export const diffEquation = (equation) => {
+
+    return nerdamer(`diff(${equation})`).text();
+}
+
+const  calcularGxnNewton = ( xn,  fxn,  fxnDiff) => {
+        
+    return (xn - (fxn/fxnDiff));
 }

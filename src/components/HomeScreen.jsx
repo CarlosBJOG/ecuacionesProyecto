@@ -1,15 +1,16 @@
-import React from 'react'
+import React, {  useState } from 'react'
 
 import Swal from 'sweetalert2';
 
-import { secante } from '../helpers/functions';
+import { diffEquation, newton, secante } from '../helpers/functions';
 import { useForm } from '../hooks/useForm'
+import { ChartScreen } from './ChartScreen';
 
 
 export const HomeScreen = () => {
 
     const [formValues, handleInputChange, reset, setValues] = useForm({
-        ecuacion: 'x^3 + 2*x - 4',
+        ecuacion: 'x^3*cos(x)+3*x-6',
         xnValue:0,
         derivada: 0,
         resultados: ''
@@ -17,9 +18,11 @@ export const HomeScreen = () => {
 
     const { ecuacion, xnValue, derivada, resultados } = formValues;
 
+    const [plot, setplot] = useState(false);
 
     const handleReset = () => {
         reset();
+        setplot(false);
     }
 
     const handleSecante = () => {
@@ -45,7 +48,7 @@ export const HomeScreen = () => {
                             ...formValues,
                             resultados: value,
                         })
-
+                setplot(true);
                 
                 }
             })
@@ -61,8 +64,21 @@ export const HomeScreen = () => {
             resultados: value,
         })
 
+    }
 
-  
+
+
+    const handleNewton = () => {
+        const diffEqua = diffEquation(ecuacion);
+
+        const val = newton(xnValue, ecuacion, diffEqua);
+        
+        setValues({
+            ...formValues,
+            derivada: diffEqua,
+            resultados: val
+        })
+        setplot(true);
     }
 
     return (
@@ -116,13 +132,24 @@ export const HomeScreen = () => {
                                 className="btn btn-outline-primary m-1"
                                 onClick = {handleSecante}
                             >Secante</button>
-                            <button className="btn btn-outline-success m-1">Newton</button>
+                            <button 
+                                className="btn btn-outline-success m-1"
+                                onClick = {handleNewton}
+                            >Newton</button>
                             <button 
                                 className="btn btn-danger m-1"
                                 onClick={handleReset}
                             >Reset</button>
                         </div>
                     </div>
+                </div>
+
+                <div className="row">
+                    
+                    {
+                        (plot) && <ChartScreen equation = {ecuacion}/>
+
+                    }
                 </div>
             </div>
         
